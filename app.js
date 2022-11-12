@@ -1,29 +1,42 @@
-const express = require("express");
+require('dotenv').config();
+
+const express = require('express');
 
 const app = express();
 
-const port = 5000;
+app.use(express.json());
+
+const port = 5052;
 
 const welcome = (req, res) => {
-  res.send("Welcome to my favourite movie list");
+  res.send('Welcome to my favourite movie list');
 };
 
-app.get("/", welcome);
+app.get('/', welcome);
 
-const movieHandlers = require("./movieHandlers");
+const movieHandlers = require('./movieHandlers');
 
-app.get("/api/movies", movieHandlers.getMovies);
-app.get("/api/movies/:id", movieHandlers.getMovieById);
+const userHandler = require('./userHandler');
+const { validateMovie, validateUsers } = require('./validators');
 
-const usersHandlers = require("./usersHandlers");
+app.put('/api/movies/:id', validateMovie, movieHandlers.putMovies);
 
-app.get("/api/users", usersHandlers.getUsers);
-app.get("/api/users/:id", usersHandlers.getUserById);
+app.post('/api/movies', validateMovie, movieHandlers.postMovies);
+app.get('/api/movies-json', movieHandlers.getMoviesFromJson);
+app.get('/api/movies-json/:id', movieHandlers.getMovieFromJsonById);
+app.delete('/api/movies/:id', movieHandlers.deleteMovies);
+app.get('/api/movies', movieHandlers.getMoviesFromDB);
+app.get('/api/movies/:id', movieHandlers.getMovieFromDbById);
 
+app.delete('/api/users/:id', userHandler.deleteUsers);
+app.put('/api/users/:id', validateUsers, userHandler.putUsers);
+app.post('/api/users', validateUsers, userHandler.postUsers);
+app.get('/api/users', userHandler.getUsers);
+app.get('/api/users/:id', userHandler.getUserById);
 
 app.listen(port, (err) => {
   if (err) {
-    console.error("Something bad happened");
+    console.error('Something bad happened');
   } else {
     console.log(`Server is listening on ${port}`);
   }
